@@ -1,5 +1,6 @@
 module RubyRedisLock
 
+  LOCK_KEY_BASE = "RubyRedisLock".freeze
   LockAcquisitionTimeoutException = Class.new(StandardError)
 
   def lock(lock_name, processing_timeout=60, acquiring_timout=10)
@@ -24,7 +25,7 @@ module RubyRedisLock
 
   def try_acquire_lock(lock_name, processing_timeout=60)
     ret = self.setnx(ruby_redis_lock_key(lock_name), "#{Time.now.to_i + processing_timeout}")
-    return true if ret == true
+    return true if ret
 
     expiration = self.get(ruby_redis_lock_key(lock_name)).to_i
     return false if Time.now.to_i < expiration
@@ -50,7 +51,7 @@ module RubyRedisLock
   end
 
   def ruby_redis_lock_key(lock_name)
-    "RubyRedisLock:#{lock_name}"
+    "#{LOCK_KEY_BASE}:#{lock_name}"
   end
 
 end
